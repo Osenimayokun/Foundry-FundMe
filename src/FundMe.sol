@@ -24,7 +24,7 @@ contract FundMe {
     function fund() public payable {
         // require(msg.value > 1e18,"Didn't send enough ETH"); // WEI TO ETHER
         require(
-            msg.value.getConversionRate() >= MINIMUM_USD,
+            msg.value.getConversionRate(s_priceFeed) >= MINIMUM_USD,
             "Didn't send enough ETH"
         );
         // require(getConversionRate(msg.value) >= minimumUSD,"Didn't send enough ETH");
