@@ -11,6 +11,7 @@ contract FundMeTest is Test {
     address USER = makeAddr("user"); // this is to create a fake address for testing
     uint256 constant SEND_VALUE = 0.1 ether;
     uint256 constant STARTING_BALANCE = 10 ether;
+    uint256 constant GAS_PRICE = 1;
 
     function setUp() external {
         DeployFundMe deployFundMe = new DeployFundMe();
@@ -55,8 +56,13 @@ contract FundMeTest is Test {
         uint256 startingFundMeBalance = address(fundMe).balance;
 
         // Act
+        uint256 gasStart = gasleft();
+        vm.txGasPrice(GAS_PRICE);
         vm.prank(fundMe.getOwner());
         fundMe.withdraw();
+        uint256 gasEnd = gasleft();
+        uint256 gasUSed = (gasStart - gasEnd) * tx.gasprice; // tx.gasprice is build into sol
+        console.log(gasUSed);
 
         // Assert
         uint256 endingOwnerBalance = fundMe.getOwner().balance;
