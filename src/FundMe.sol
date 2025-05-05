@@ -10,10 +10,10 @@ contract FundMe {
     using PriceConverter for uint256;
     uint256 public constant MINIMUM_USD = 5e18;
     // 	889467
-    address[] public funders;
-    mapping(address => uint256) public amountSentFromFunders;
+    address[] private s_funders;
+    mapping(address => uint256) private s_amountSentFromFunders;
 
-    address public immutable owner;
+    address private immutable owner;
     AggregatorV3Interface private s_priceFeed;
 
     constructor(address priceFeed) {
@@ -28,22 +28,22 @@ contract FundMe {
             "Didn't send enough ETH"
         );
         // require(getConversionRate(msg.value) >= minimumUSD,"Didn't send enough ETH");
-        funders.push(msg.sender);
-        amountSentFromFunders[msg.sender] = msg.value;
+        s_funders.push(msg.sender);
+        s_amountSentFromFunders[msg.sender] = msg.value;
     }
 
     function withdraw() public onlyOwner {
         // require(msg.sender == owner, "Must be the Owner"); // Was ticked out because a modifer will be created
         for (
             uint256 funderIndex = 0;
-            funderIndex < funders.length;
+            funderIndex < s_funders.length;
             funderIndex++
         ) {
-            address funder = funders[funderIndex];
-            amountSentFromFunders[funder] = 0;
+            address funder = s_funders[funderIndex];
+            s_amountSentFromFunders[funder] = 0;
         }
 
-        funders = new address[](0);
+        s_funders = new address[](0);
         (bool callSuccess, ) = payable(msg.sender).call{
             value: address(this).balance
         }("");
@@ -79,5 +79,21 @@ contract FundMe {
     // fallback()
     fallback() external payable {
         fund();
+    }
+
+    // View / Pure Functions
+
+    function getAddressToAmountFunded(
+        address fundingAddress
+    ) external view returns (uint256) {
+        return s_amountSentFromFunders[fundingAddress];
+    }
+
+    function getFunder(uint256 index) external view returns (address) {
+        return s_funders[index];
+    }
+
+    function getOwner() external view returns (address) {
+        return owner;
     }
 }

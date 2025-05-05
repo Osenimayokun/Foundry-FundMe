@@ -12,7 +12,7 @@ contract DeployFundMe is Script {
         address ethUsdPriceFeed = helperConfig.activeNetworkConfig();
         // deploying our fundMe contract
         FundMe fundMe = new FundMe(ethUsdPriceFeed);
-        vm.startBroadcast();
+        vm.stopBroadcast();
         return fundMe;
     }
 }
